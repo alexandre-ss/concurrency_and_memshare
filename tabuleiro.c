@@ -98,71 +98,21 @@ void *player_one_play(){
         case UP:
             if(player_1.posx > 0 && game_board.board[player_1.posx-1][player_1.posy]  == 'x'){
                 player_1.posx -= 1;
-                /*if(game_board.board[player_1.posx][player_1.posy] == 'r' || game_board.board[player_1.posx][player_1.posy] == 'b'){ 
-                    player_1.posx += 1;
-
-                    if(player_1.posy > 0 && game_board.board[player_1.posx][player_1.posy-1] == 'x'){
-                        player_1.posy -=1;
-                    }
-                    else if(player_1.posy < 7 && game_board.board[player_1.posx][player_1.posy+1] == 'x'){
-                        player_1.posy +=1;    
-                    }
-                    else if(player_1.posx < 7 && game_board.board[player_1.posx+1][player_1.posy] == 'x'){
-                        player_1.posx +=1;    
-                    }
-                }*/        
             }
             break;
         case DOWN:
             if(player_1.posx < 7 && game_board.board[player_1.posx+1][player_1.posy] == 'x'){
-                player_1.posx += 1;
-                /*if(game_board.board[player_1.posx][player_1.posy] == 'r' || game_board.board[player_1.posx][player_1.posy] == 'b'){ 
-                    player_1.posx -= 1;
-                    if(player_1.posy < 7 && game_board.board[player_1.posx][player_1.posy+1] == 'x'){
-                        player_1.posy +=1;    
-                    }
-                    else if(player_1.posy > 0 && game_board.board[player_1.posx][player_1.posy-1] == 'x'){
-                        player_1.posy -=1;
-                    }
-                    else if(player_1.posx > 0 && game_board.board[player_1.posx-1][player_1.posy] == 'x'){
-                        player_1.posx -=1;    
-                    }
-                }*/      
+                player_1.posx += 1;  
             }
             break;
         case LEFT:
             if(player_1.posy > 0 && game_board.board[player_1.posx][player_1.posy-1]  == 'x'){
                 player_1.posy -= 1;
-                /*if(game_board.board[player_1.posx][player_1.posy] == 'r' || game_board.board[player_1.posx][player_1.posy] == 'b'){ 
-                    player_1.posy += 1;
-                    if(player_1.posx > 0 && game_board.board[player_1.posx-1][player_1.posy] == 'x'){
-                        player_1.posx -=1;    
-                    }
-                    else if(player_1.posy < 7 && game_board.board[player_1.posx][player_1.posy+1] == 'x'){
-                        player_1.posy +=1;    
-                    }
-                    else if(player_1.posx < 7 && game_board.board[player_1.posx+1][player_1.posy] == 'x' ){
-                        player_1.posx +=1;
-                    }
-
-                }*/     
             }
             break;
         case RIGHT:
             if(player_1.posy < 7 && game_board.board[player_1.posx][player_1.posy+1]  == 'x'){
                 player_1.posy += 1;
-                /*if(game_board.board[player_1.posx][player_1.posy] == 'r' || game_board.board[player_1.posx][player_1.posy] != 'b'){ 
-                    player_1.posy -= 1;
-                    if(player_1.posy > 0 && game_board.board[player_1.posx][player_1.posy-1] == 'x'){
-                        player_1.posy -=1;
-                    }
-                    else if(player_1.posx > 0 && game_board.board[player_1.posx-1][player_1.posy] == 'x'){
-                        player_1.posx -=1;    
-                    }
-                    else if(player_1.posx < 7 && game_board.board[player_1.posx+1][player_1.posy] == 'x'){
-                        player_1.posx +=1;    
-                    }
-                }*/   
             }
             break;        
         default:
@@ -183,70 +133,21 @@ void *player_two_play(){
         case UP:
             if(player_2.posx > 0 && game_board.board[player_2.posx-1][player_2.posy]  == 'x'){
                 player_2.posx -= 1;
-                /*if(game_board.board[player_2.posx][player_2.posy] == 'b' || game_board.board[player_2.posx][player_2.posy] == 'r'){ 
-                    player_2.posx += 1;
-
-                    if(player_2.posy > 0 && game_board.board[player_2.posx][player_2.posy-1] == 'x'){
-                        player_2.posy -=1;
-                    }
-                    else if(player_2.posx < 7 && game_board.board[player_2.posx+1][player_2.posy] == 'x'){
-                        player_2.posx +=1;    
-                    }
-                    else if(player_2.posy < 7 && game_board.board[player_2.posx][player_2.posy+1] == 'x'){
-                        player_2.posy +=1;    
-                    }
-                }*/               
             }
             break;
         case DOWN:
             if(player_2.posx < 7  && game_board.board[player_2.posx+1][player_2.posy]  == 'x'){
                 player_2.posx += 1;
-                /*if(game_board.board[player_2.posx][player_2.posy] == 'b'|| game_board.board[player_2.posx][player_2.posy] == 'r'){ 
-                    player_2.posx -= 1;
-                    if(player_2.posx > 0 && game_board.board[player_2.posx-1][player_2.posy] == 'x'){
-                        player_2.posx -=1;    
-                    }
-                    else if(player_2.posy < 7 && game_board.board[player_2.posx][player_2.posy+1] == 'x'){
-                        player_2.posy +=1;    
-                    }
-                    else if(player_2.posy > 0 && game_board.board[player_2.posx][player_2.posy-1] == 'x'){
-                        player_2.posy -=1;
-                    }
-                }*/ 
             }
             break;
         case LEFT:
             if(player_2.posy > 0  && game_board.board[player_2.posx][player_2.posy-1]  == 'x'){
                 player_2.posy -= 1;
-                /*if(game_board.board[player_2.posx][player_2.posy] == 'b' || game_board.board[player_2.posx][player_2.posy] == 'r'){ 
-                    player_2.posy += 1;
-                    if(player_2.posx > 0 && game_board.board[player_2.posx-1][player_2.posy] == 'x'){
-                        player_2.posx -=1;    
-                    }
-                    else if(player_2.posx < 7 && game_board.board[player_2.posx+1][player_2.posy] == 'x' ){
-                        player_2.posx +=1;
-                    }
-                    else if(player_2.posy < 7 && game_board.board[player_2.posx][player_2.posy+1] == 'x'){
-                        player_2.posy +=1;    
-                    }
-                }*/  
             }
             break;
         case RIGHT:
             if(player_2.posy < 7  && game_board.board[player_2.posx][player_2.posy+1] == 'x'){
-                player_2.posy += 1;
-                /*if(game_board.board[player_2.posx][player_2.posy] == 'b' || game_board.board[player_2.posx][player_2.posy] == 'r'){ 
-                    player_2.posy -= 1;
-                    if(player_2.posx > 0 && game_board.board[player_2.posx-1][player_2.posy] == 'x'){
-                        player_2.posx -=1;    
-                    }
-                    else if(player_2.posx < 7 && game_board.board[player_2.posx+1][player_2.posy] == 'x'){
-                        player_2.posx +=1;    
-                    }
-                    else if(player_2.posy > 0 && game_board.board[player_2.posx][player_2.posy-1] == 'x'){
-                        player_2.posy -=1;
-                    }
-                }*/    
+                player_2.posy += 1; 
             }
             break;        
         default:
