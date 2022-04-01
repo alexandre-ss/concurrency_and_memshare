@@ -24,6 +24,11 @@ typedef struct
     int board[8][8];
 
 } board;
+typedef struct 
+{
+    /* data */
+} history;
+
 
 player player_1;
 player player_2;
