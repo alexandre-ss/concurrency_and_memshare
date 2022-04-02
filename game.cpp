@@ -45,14 +45,15 @@ Board board;
 int main()
 {
     pthread_t thread1, thread2;
+    srand(time(NULL));
     int iret1, iret2;
     struct timespec ts;
-    ts.tv_sec = 0.1;
-    ts.tv_nsec = (100 % 1000) * 1000000;
-    srand(time(NULL));
+    ts.tv_sec = 0.2;
+    ts.tv_nsec = (200 % 1000) * 1000000;
+
     setup_board();
 
-    while (!player_1.blocked && !player_2.blocked)
+    while (!player_1.blocked || !player_2.blocked)
     {
 
         iret1 = pthread_create(&thread1, NULL, player_one_play, NULL);
@@ -111,10 +112,11 @@ void *player_one_play(void *)
         random_choice_p1();
         add_piece_player_1();
     }
-    else if (is_blocked(player_1.x, player_1.y, 'r'))
+    else
     {
         while (is_blocked(player_1.x, player_1.y, 'r') && !player_1.blocked)
         {
+
             player_1.history_x.pop();
             player_1.history_y.pop();
             if (!player_1.history_x.empty())
@@ -138,7 +140,7 @@ void *player_two_play(void *)
         random_choice_p2();
         add_piece_player_2();
     }
-    else if (is_blocked(player_2.x, player_2.y, 'b'))
+    else
     {
         while (is_blocked(player_2.x, player_2.y, 'b') && !player_2.blocked)
         {
@@ -146,6 +148,7 @@ void *player_two_play(void *)
             player_2.history_y.pop();
             if (!player_2.history_x.empty())
             {
+
                 player_2.x = player_2.history_x.top();
                 player_2.y = player_2.history_y.top();
             }
@@ -179,7 +182,68 @@ int is_blocked(int pos_x, int pos_y, char value)
 {
     if (board.game_board[pos_x][pos_y] == value)
     {
-        if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
+        if (pos_x == 0)
+        {
+            if (pos_y == 0)
+            {
+                if (!(board.game_board[pos_x + 1][pos_y] == 'x' ||
+                      board.game_board[pos_x][pos_y + 1] == 'x'))
+                    return 1;
+            }
+            else if (pos_y == WIDTH - 1)
+            {
+                if (!(board.game_board[pos_x + 1][pos_y] == 'x' ||
+                      board.game_board[pos_x][pos_y - 1] == 'x'))
+                    return 1;
+            }
+            else
+            {
+                if (!(board.game_board[pos_x + 1][pos_y] == 'x' ||
+                      board.game_board[pos_x][pos_y - 1] == 'x' ||
+                      board.game_board[pos_x][pos_y + 1] == 'x'))
+                    return 1;
+            }
+        }
+
+        else if (pos_x == HEIGHT - 1)
+        {
+            if (pos_y == 0)
+            {
+                if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
+                      board.game_board[pos_x][pos_y + 1] == 'x'))
+                    return 1;
+            }
+            else if (pos_y == WIDTH - 1)
+            {
+                if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
+                      board.game_board[pos_x][pos_y - 1] == 'x'))
+                    return 1;
+            }
+            else
+            {
+                if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
+                      board.game_board[pos_x][pos_y - 1] == 'x' ||
+                      board.game_board[pos_x][pos_y + 1] == 'x'))
+                    return 1;
+            }
+        }
+
+        else if (pos_y == 0)
+        {
+            if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
+                  board.game_board[pos_x + 1][pos_y] == 'x' ||
+                  board.game_board[pos_x][pos_y + 1] == 'x'))
+                return 1;
+        }
+        else if (pos_y == WIDTH - 1)
+        {
+            if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
+                  board.game_board[pos_x + 1][pos_y] == 'x' ||
+                  board.game_board[pos_x][pos_y - 1] == 'x'))
+                return 1;
+        }
+
+        else if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
               board.game_board[pos_x + 1][pos_y] == 'x' ||
               board.game_board[pos_x][pos_y - 1] == 'x' ||
               board.game_board[pos_x][pos_y + 1] == 'x'))
