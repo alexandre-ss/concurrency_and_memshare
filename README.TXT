@@ -1,1 +1,1 @@
-mano, vê o porque de o p2 está jogando menos que o p1
+care with thread now
