@@ -1,51 +1,9 @@
-#include <iostream>
-#include <unistd.h>
-#include <stdlib.h>
-#include <pthread.h>
-#include <time.h>
-#include <stack>
-
-using namespace std;
-#define UP 1
-#define DOWN 2
-#define LEFT 3
-#define RIGHT 4
-#define HEIGHT 8
-#define WIDTH 8
-
-void *player_one_play(void *);
-void *player_two_play(void *);
-void counter();
-int is_blocked(int, int, char);
-void setup_board();
-void add_piece_player_1();
-void add_piece_player_2();
-void print_board();
-void random_choice_p1();
-void random_choice_p2();
-class Player
-{
-public:
-    int x, y, blocked;
-    stack<int> history_x;
-    stack<int> history_y;
-};
-
-class Board
-{
-public:
-    int red, blue;
-    char game_board[HEIGHT][WIDTH];
-};
-
-Player player_1;
-Player player_2;
-Board board;
+#include "game.hpp"
 
 int main()
 {
-    pthread_t thread1, thread2;
     srand(time(NULL));
+    pthread_t thread1, thread2;
     int iret1, iret2;
     struct timespec ts;
     ts.tv_sec = 0.2;
@@ -107,10 +65,15 @@ void setup_board()
 
 void *player_one_play(void *)
 {
+
     if (!is_blocked(player_1.x, player_1.y, 'r'))
     {
         random_choice_p1();
-        add_piece_player_1();
+        pthread_mutex_lock(&lock);
+        if(board.game_board[player_1.x][player_1.y] = 'x'){
+            add_piece_player_1();
+        }
+        pthread_mutex_unlock(&lock);
     }
     else
     {
@@ -130,15 +93,23 @@ void *player_one_play(void *)
             }
         }
     }
+
     pthread_exit(NULL);
 }
 
 void *player_two_play(void *)
 {
+    
     if (!is_blocked(player_2.x, player_2.y, 'b'))
     {
         random_choice_p2();
-        add_piece_player_2();
+        pthread_mutex_lock(&lock);
+            
+        if(board.game_board[player_2.x][player_2.y] = 'x'){
+            add_piece_player_2();
+        }
+
+        pthread_mutex_unlock(&lock);
     }
     else
     {
@@ -273,7 +244,21 @@ void print_board()
     {
         for (int j = 0; j < WIDTH; j++)
         {
-            cout << char(board.game_board[i][j]) << ' ';
+
+            if (board.game_board[i][j] == 'r')
+            {
+                printf("\x1b[31m" "* " "\x1b[0m");
+            }
+            else if (board.game_board[i][j] == 'b')
+            {
+                printf("\x1b[34m" "* " "\x1b[0m");
+            }
+            else{
+                printf("x ");
+            }
+            
+            
+            //cout << char(board.game_board[i][j]) << ' ';
         }
         cout << endl;
     }
