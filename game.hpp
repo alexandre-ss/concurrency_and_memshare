@@ -11,8 +11,8 @@ using namespace std;
 #define LEFT 3
 #define RIGHT 4
 
-#define HEIGHT 8
-#define WIDTH 8
+#define HEIGHT 15
+#define WIDTH 15
 
 void *player_one_play(void *);
 void *player_two_play(void *);
@@ -24,6 +24,8 @@ void add_piece_player_2();
 void print_board();
 void random_choice_p1();
 void random_choice_p2();
+void print_blue_board();
+void print_red_board();
 
 class Player
 {
@@ -42,6 +44,10 @@ public:
 
 Player player_1;
 Player player_2;
+
 Board board;
+
+Board blue_position;
+Board red_position;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;

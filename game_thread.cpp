@@ -28,8 +28,14 @@ int main()
     const char *winner = board.red > board.blue ? "red" : "blue";
     cout << "the winner is " << winner << "!" << endl;
     print_board();
+    cout << endl;
 
-    exit(0);
+    cout << "Red private board:" << endl;
+    print_red_board();
+    cout << endl;
+
+    cout << "Blue private board:" << endl;
+    print_blue_board();
 
     return 0;
 }
@@ -42,11 +48,18 @@ void setup_board()
         for (int j = 0; j < WIDTH; j++)
         {
             board.game_board[i][j] = 'x';
+            blue_position.game_board[i][j] = 'x';
+            red_position.game_board[i][j] = 'x';
         }
     }
 
     board.game_board[0][WIDTH / 2] = 'r';
+
+    red_position.game_board[0][WIDTH / 2] = 'r';
+
     board.game_board[HEIGHT - 1][WIDTH / 2] = 'b';
+    blue_position.game_board[HEIGHT - 1][WIDTH / 2] = 'b';
+
     board.red = 0;
     board.blue = 0;
 
@@ -69,8 +82,11 @@ void *player_one_play(void *)
     if (!is_blocked(player_1.x, player_1.y, 'r'))
     {
         random_choice_p1();
+
         pthread_mutex_lock(&lock);
-        if(board.game_board[player_1.x][player_1.y] = 'x'){
+
+        if (board.game_board[player_1.x][player_1.y] = 'x')
+        {
             add_piece_player_1();
         }
         pthread_mutex_unlock(&lock);
@@ -99,13 +115,15 @@ void *player_one_play(void *)
 
 void *player_two_play(void *)
 {
-    
+
     if (!is_blocked(player_2.x, player_2.y, 'b'))
     {
         random_choice_p2();
+
         pthread_mutex_lock(&lock);
-            
-        if(board.game_board[player_2.x][player_2.y] = 'x'){
+
+        if (board.game_board[player_2.x][player_2.y] = 'x')
+        {
             add_piece_player_2();
         }
 
@@ -215,9 +233,9 @@ int is_blocked(int pos_x, int pos_y, char value)
         }
 
         else if (!(board.game_board[pos_x - 1][pos_y] == 'x' ||
-              board.game_board[pos_x + 1][pos_y] == 'x' ||
-              board.game_board[pos_x][pos_y - 1] == 'x' ||
-              board.game_board[pos_x][pos_y + 1] == 'x'))
+                   board.game_board[pos_x + 1][pos_y] == 'x' ||
+                   board.game_board[pos_x][pos_y - 1] == 'x' ||
+                   board.game_board[pos_x][pos_y + 1] == 'x'))
             return 1;
     }
     return 0;
@@ -226,6 +244,7 @@ int is_blocked(int pos_x, int pos_y, char value)
 void add_piece_player_1()
 {
     board.game_board[player_1.x][player_1.y] = 'r';
+    red_position.game_board[player_1.x][player_1.y] = 'r';
     player_1.history_x.push(player_1.x);
     player_1.history_y.push(player_1.y);
 }
@@ -233,13 +252,14 @@ void add_piece_player_1()
 void add_piece_player_2()
 {
     board.game_board[player_2.x][player_2.y] = 'b';
+    blue_position.game_board[player_2.x][player_2.y] = 'b';
     player_2.history_x.push(player_2.x);
     player_2.history_y.push(player_2.y);
 }
 
 void print_board()
 {
-    cout << "***************" << endl;
+    cout << "*****************************" << endl;
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
@@ -247,23 +267,75 @@ void print_board()
 
             if (board.game_board[i][j] == 'r')
             {
-                printf("\x1b[31m" "* " "\x1b[0m");
+                printf("\x1b[31m"
+                       "* "
+                       "\x1b[0m");
             }
             else if (board.game_board[i][j] == 'b')
             {
-                printf("\x1b[34m" "* " "\x1b[0m");
+                printf("\x1b[34m"
+                       "* "
+                       "\x1b[0m");
             }
-            else{
+            else
+            {
                 printf("x ");
             }
-            
-            
-            //cout << char(board.game_board[i][j]) << ' ';
         }
         cout << endl;
     }
 
-    cout << "***************" << endl;
+    cout << "*****************************" << endl;
+}
+
+void print_blue_board()
+{
+    cout << "*****************************" << endl;
+    for (int i = 0; i < HEIGHT; i++)
+    {
+        for (int j = 0; j < WIDTH; j++)
+        {
+
+            if (blue_position.game_board[i][j] == 'b')
+            {
+                printf("\x1b[34m"
+                       "* "
+                       "\x1b[0m");
+            }
+            else
+            {
+                printf("x ");
+            }
+        }
+        cout << endl;
+    }
+
+    cout << "*****************************" << endl;
+}
+
+void print_red_board()
+{
+    cout << "*****************************" << endl;
+    for (int i = 0; i < HEIGHT; i++)
+    {
+        for (int j = 0; j < WIDTH; j++)
+        {
+
+            if (red_position.game_board[i][j] == 'r')
+            {
+                printf("\x1b[31m"
+                       "* "
+                       "\x1b[0m");
+            }
+            else
+            {
+                printf("x ");
+            }
+        }
+        cout << endl;
+    }
+
+    cout << "*****************************" << endl;
 }
 
 void random_choice_p1()
