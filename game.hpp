@@ -4,6 +4,10 @@
 #include <pthread.h>
 #include <time.h>
 #include <stack>
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <semaphore.h>
+
 
 using namespace std;
 #define UP 1
@@ -28,6 +32,7 @@ void print_blue_board();
 void print_red_board();
 void start_processes();
 
+
 class Player
 {
 public:
@@ -43,6 +48,7 @@ public:
     char game_board[HEIGHT][WIDTH];
 };
 
+void play(pid_t, Board*);
 Player player_1;
 Player player_2;
 
