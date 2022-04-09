@@ -1,49 +1,28 @@
 #include "game.hpp"
-#include <signal.h>
-#include <sys/wait.h>
 
 int main()
 {
-  pid_t process_1, process_2;
-  process_1 = fork();
-  process_2 = fork();
 
   setup_board();
 
   srand(time(NULL));
   struct timespec ts;
-  ts.tv_sec = 0.7;
-  ts.tv_nsec = (700 % 1000) * 1000000;
+  ts.tv_sec = 0.2;
+  ts.tv_nsec = (200 % 1000) * 1000000;
 
-  int status;
-  while (!(player_1.blocked && player_2.blocked))
+  while (!player_1.blocked || !player_2.blocked)
   {
-
-    if (process_1 == 0)
-    {
-      cout << "player 1 playing!" << endl;
-      
-    }
-
-    if (process_2 == 0)
-    {
-      cout << "player 2 playing!" << endl;
-    }
-    for (int i = 0; i < 2; i++)
-      wait(&status);
-
-    nanosleep(&ts, NULL);
+    player_one_play(NULL);
+    player_two_play(NULL);
     print_board();
+    nanosleep(&ts, NULL);
     system("clear");
   }
 
-  if (player_1.blocked && player_2.blocked)
-  {
-    counter();
-    const char *winner = board.red > board.blue ? "red" : "blue";
-    cout << "the winner is " << winner << "!" << endl;
-    print_board();
-  }
+  counter();
+  const char *winner = board.red > board.blue ? "red" : "blue";
+  cout << "the winner is " << winner << "!" << endl;
+  print_board();
 
   return 0;
 }
@@ -84,14 +63,7 @@ void *player_one_play(void *)
   {
     random_choice_p1();
 
-    while (signal_att)
-      ;
-    if (board.game_board[player_1.x][player_1.y] == 'x')
-    {
-      signal_att = 1;
-      add_piece_player_1();
-      signal_att = 0;
-    }
+    add_piece_player_1();
   }
   else
   {
@@ -121,14 +93,7 @@ void *player_two_play(void *)
   {
     random_choice_p2();
 
-    while (signal_att)
-      ;
-    if (board.game_board[player_2.x][player_2.y] == 'x')
-    {
-      signal_att = 1;
-      add_piece_player_2();
-      signal_att = 0;
-    }
+    add_piece_player_2();
   }
   else
   {

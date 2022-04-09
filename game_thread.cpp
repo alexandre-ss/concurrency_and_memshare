@@ -4,18 +4,18 @@ int main()
 {
     srand(time(NULL));
     pthread_t thread1, thread2;
-    int iret1, iret2;
+
     struct timespec ts;
     ts.tv_sec = 0.2;
     ts.tv_nsec = (200 % 1000) * 1000000;
 
     setup_board();
 
-    while (!player_1.blocked || !player_2.blocked)
+    while (!(player_1.blocked && player_2.blocked))
     {
 
-        iret1 = pthread_create(&thread1, NULL, player_one_play, NULL);
-        iret2 = pthread_create(&thread2, NULL, player_two_play, NULL);
+        pthread_create(&thread1, NULL, player_one_play, NULL);
+        pthread_create(&thread2, NULL, player_two_play, NULL);
 
         pthread_join(thread1, NULL);
         pthread_join(thread2, NULL);
@@ -24,7 +24,9 @@ int main()
         nanosleep(&ts, NULL);
         system("clear");
     }
+
     counter();
+    
     const char *winner = board.red > board.blue ? "red" : "blue";
     cout << "the winner is " << winner << "!" << endl;
     print_board();
@@ -78,14 +80,14 @@ void setup_board()
 
 void *player_one_play(void *)
 {
-
+    cout << "player 1 playing!" << endl;
     if (!is_blocked(player_1.x, player_1.y, 'r'))
     {
         random_choice_p1();
 
         pthread_mutex_lock(&lock);
 
-        if (board.game_board[player_1.x][player_1.y] = 'x')
+        if (board.game_board[player_1.x][player_1.y] == 'x')
         {
             add_piece_player_1();
         }
@@ -115,18 +117,17 @@ void *player_one_play(void *)
 
 void *player_two_play(void *)
 {
-
+    cout << "player 2 playing!" << endl;
     if (!is_blocked(player_2.x, player_2.y, 'b'))
     {
         random_choice_p2();
 
         pthread_mutex_lock(&lock);
 
-        if (board.game_board[player_2.x][player_2.y] = 'x')
+        if (board.game_board[player_2.x][player_2.y] == 'x')
         {
             add_piece_player_2();
         }
-
         pthread_mutex_unlock(&lock);
     }
     else
