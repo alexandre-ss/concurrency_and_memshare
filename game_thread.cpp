@@ -1,37 +1,31 @@
 #include "game.hpp"
-
+struct timespec ts;
 int main()
 {
     srand(time(NULL));
     pthread_t thread1, thread2;
-
-    struct timespec ts;
-    ts.tv_sec = 0.2;
-    ts.tv_nsec = (200 % 1000) * 1000000;
-
+    clock_t begin = clock();
     setup_board();
 
+    pthread_create(&thread1, NULL, player_one_play, NULL);
+    pthread_create(&thread2, NULL, player_two_play, NULL);
+
+    pthread_join(thread1, NULL);
+    pthread_join(thread2, NULL);
+
     while (!(player_1.blocked && player_2.blocked))
-    {
+        ;
 
-        pthread_create(&thread1, NULL, player_one_play, NULL);
-        pthread_create(&thread2, NULL, player_two_play, NULL);
-
-        pthread_join(thread1, NULL);
-        pthread_join(thread2, NULL);
-
-        print_board();
-        nanosleep(&ts, NULL);
-        system("clear");
-    }
+    system("clear");
 
     counter();
-    
+
     const char *winner = board.red > board.blue ? "red" : "blue";
     cout << "the winner is " << winner << "!" << endl;
     print_board();
     cout << endl;
 
+    clock_t end = clock();
     cout << "Red private board:" << endl;
     print_red_board();
     cout << endl;
@@ -39,6 +33,7 @@ int main()
     cout << "Blue private board:" << endl;
     print_blue_board();
 
+    cout << "execution time: " << (double)(end - begin) / CLOCKS_PER_SEC << endl;
     return 0;
 }
 
@@ -80,73 +75,84 @@ void setup_board()
 
 void *player_one_play(void *)
 {
-    cout << "player 1 playing!" << endl;
-    if (!is_blocked(player_1.x, player_1.y, 'r'))
+    ts.tv_sec = 0.01;
+    ts.tv_nsec = (10 % 1000) * 1000000;
+    while (!player_1.blocked)
     {
-        random_choice_p1();
-
-        pthread_mutex_lock(&lock);
-
-        if (board.game_board[player_1.x][player_1.y] == 'x')
+        cout << "player 1 playing!\n";
+        if (!is_blocked(player_1.x, player_1.y, 'r'))
         {
-            add_piece_player_1();
+            random_choice_p1();
+
+            pthread_mutex_lock(&lock);
+
+            if (board.game_board[player_1.x][player_1.y] == 'x')
+            {
+                add_piece_player_1();
+            }
+            pthread_mutex_unlock(&lock);
         }
-        pthread_mutex_unlock(&lock);
-    }
-    else
-    {
-        while (is_blocked(player_1.x, player_1.y, 'r') && !player_1.blocked)
+        else
         {
+            while (is_blocked(player_1.x, player_1.y, 'r') && !player_1.blocked)
+            {
 
-            player_1.history_x.pop();
-            player_1.history_y.pop();
-            if (!player_1.history_x.empty())
-            {
-                player_1.x = player_1.history_x.top();
-                player_1.y = player_1.history_y.top();
-            }
-            else
-            {
-                player_1.blocked = 1;
+                player_1.history_x.pop();
+                player_1.history_y.pop();
+                if (!player_1.history_x.empty())
+                {
+                    player_1.x = player_1.history_x.top();
+                    player_1.y = player_1.history_y.top();
+                }
+                else
+                {
+                    player_1.blocked = 1;
+                }
             }
         }
+        nanosleep(&ts, NULL);
     }
-
     pthread_exit(NULL);
 }
 
 void *player_two_play(void *)
 {
-    cout << "player 2 playing!" << endl;
-    if (!is_blocked(player_2.x, player_2.y, 'b'))
+    ts.tv_sec = 0.01;
+    ts.tv_nsec = (10 % 1000) * 1000000;
+    while (!player_2.blocked)
     {
-        random_choice_p2();
-
-        pthread_mutex_lock(&lock);
-
-        if (board.game_board[player_2.x][player_2.y] == 'x')
+        cout << "player 2 playing!\n";
+        if (!is_blocked(player_2.x, player_2.y, 'b'))
         {
-            add_piece_player_2();
-        }
-        pthread_mutex_unlock(&lock);
-    }
-    else
-    {
-        while (is_blocked(player_2.x, player_2.y, 'b') && !player_2.blocked)
-        {
-            player_2.history_x.pop();
-            player_2.history_y.pop();
-            if (!player_2.history_x.empty())
-            {
+            random_choice_p2();
 
-                player_2.x = player_2.history_x.top();
-                player_2.y = player_2.history_y.top();
-            }
-            else
+            pthread_mutex_lock(&lock);
+
+            if (board.game_board[player_2.x][player_2.y] == 'x')
             {
-                player_2.blocked = 1;
+                add_piece_player_2();
+            }
+            pthread_mutex_unlock(&lock);
+        }
+        else
+        {
+            while (is_blocked(player_2.x, player_2.y, 'b') && !player_2.blocked)
+            {
+                player_2.history_x.pop();
+                player_2.history_y.pop();
+                if (!player_2.history_x.empty())
+                {
+
+                    player_2.x = player_2.history_x.top();
+                    player_2.y = player_2.history_y.top();
+                }
+                else
+                {
+                    player_2.blocked = 1;
+                }
             }
         }
+        nanosleep(&ts, NULL);
     }
     pthread_exit(NULL);
 }
@@ -260,7 +266,7 @@ void add_piece_player_2()
 
 void print_board()
 {
-    cout << "*****************************" << endl;
+    cout << "*******************" << endl;
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
@@ -286,12 +292,12 @@ void print_board()
         cout << endl;
     }
 
-    cout << "*****************************" << endl;
+    cout << "*******************" << endl;
 }
 
 void print_blue_board()
 {
-    cout << "*****************************" << endl;
+    cout << "*******************" << endl;
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
@@ -311,12 +317,12 @@ void print_blue_board()
         cout << endl;
     }
 
-    cout << "*****************************" << endl;
+    cout << "*******************" << endl;
 }
 
 void print_red_board()
 {
-    cout << "*****************************" << endl;
+    cout << "*******************" << endl;
     for (int i = 0; i < HEIGHT; i++)
     {
         for (int j = 0; j < WIDTH; j++)
@@ -336,7 +342,7 @@ void print_red_board()
         cout << endl;
     }
 
-    cout << "*****************************" << endl;
+    cout << "*******************" << endl;
 }
 
 void random_choice_p1()

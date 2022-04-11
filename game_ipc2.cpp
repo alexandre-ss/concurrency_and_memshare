@@ -11,7 +11,6 @@ void print_board_ipc(Board *);
 void add_piece(pid_t, Board *);
 int is_blocked_ipc(int, int, char, Board *);
 void start_process(pid_t process_1, Board *board_aux);
-int board_completed(Board *);
 
 struct timespec ts;
 
@@ -23,50 +22,42 @@ int main()
   sem_init(&smutex, 0, 1);
 
   srand(time(NULL));
-  clock_t begin = clock();
 
   key_t key = ftok("shmfile", 65); // gerando uma chave única
 
-  int shm_id = shmget(key, sizeof(board.game_board), 0666 | IPC_CREAT); // identificador para a memória compartilhada
+  int shm_id = shmget(key, sizeof(Board), 0666 | IPC_CREAT); // identificador para a memória compartilhada
 
   Board *board_aux = (Board *)shmat(shm_id, NULL, 0);
+
   setup_board_ipc(board_aux);
 
   process = fork();
   start_process(process, board_aux);
-
-  if (board_aux->return_condition == 1 && process > 0)
-  {
-    print_board_ipc(board_aux);
-    counter_ipc(board_aux);
-    const char *winner = board_aux->red > board_aux->blue ? "red" : "blue";
-    cout << "the winner is " << winner << "!" << endl;
-    clock_t end = clock();
-    cout << "execution time: " << (double)(end - begin) / CLOCKS_PER_SEC << endl;
-  }
-  sem_destroy(&smutex);
-  shmdt(board_aux);
   return 0;
 }
 
-void start_process(pid_t process, Board *board_aux)
+void start_process(pid_t process_1, Board *board_aux)
 {
-  ts.tv_sec = 0.01;
-  ts.tv_nsec = (10 % 1000) * 1000000;
-  while (!board_completed(board_aux))
+  ts.tv_sec = 0.5;
+  ts.tv_nsec = (500 % 1000) * 1000000;
+  while (!(board_aux->blocked1 && board_aux->blocked2))
   {
-    if (process > 0)
+    if (process_1 > 0)
     {
-      play(process, board_aux);
+      play(process_1, board_aux);
       board_aux->blocked1 = player_1.blocked ? 1 : 0;
     }
-    else if (process == 0)
+    else if (process_1 == 0)
     {
-      play(process, board_aux);
+      play(process_1, board_aux);
       board_aux->blocked2 = player_2.blocked ? 1 : 0;
     }
     nanosleep(&ts, NULL);
   }
+  print_board_ipc(board_aux);
+  sem_destroy(&smutex);
+  shmdt(board_aux);
+  exit(0);
 }
 
 void play(pid_t id, Board *board_game)
@@ -124,7 +115,6 @@ void play(pid_t id, Board *board_game)
       }
     }
   }
-
   sem_wait(&smutex);
   add_piece(id, board_game);
   sem_post(&smutex);
@@ -256,29 +246,23 @@ void add_piece(pid_t id, Board *board_ipc)
 
   if (id > 0)
   {
-    if (board_ipc->game_board[player_1.x][player_1.y] == 'x')
-    {
-      board_ipc->game_board[player_1.x][player_1.y] = 'r';
-      red_position.game_board[player_1.x][player_1.y] = 'r';
-      player_1.history_x.push(player_1.x);
-      player_1.history_y.push(player_1.y);
-    }
+    board_ipc->game_board[player_1.x][player_1.y] = 'r';
+    red_position.game_board[player_1.x][player_1.y] = 'r';
+    player_1.history_x.push(player_1.x);
+    player_1.history_y.push(player_1.y);
   }
   else if (id == 0)
   {
-    if (board_ipc->game_board[player_2.x][player_2.y] == 'x')
-    {
-      board_ipc->game_board[player_2.x][player_2.y] = 'b';
-      blue_position.game_board[player_2.x][player_2.y] = 'b';
-      player_2.history_x.push(player_2.x);
-      player_2.history_y.push(player_2.y);
-    }
+    board_ipc->game_board[player_2.x][player_2.y] = 'b';
+    blue_position.game_board[player_2.x][player_2.y] = 'b';
+    player_2.history_x.push(player_2.x);
+    player_2.history_y.push(player_2.y);
   }
 }
 
 void print_board_ipc(Board *board_ipc)
 {
-  cout << "*******************" << endl;
+  cout << "***************" << endl;
   for (int i = 0; i < HEIGHT; i++)
   {
     for (int j = 0; j < WIDTH; j++)
@@ -304,7 +288,7 @@ void print_board_ipc(Board *board_ipc)
     cout << endl;
   }
 
-  cout << "*******************" << endl;
+  cout << "***************" << endl;
 }
 
 void random_choice_p1_ipc(Board *board_ipc)
@@ -380,16 +364,52 @@ void random_choice_p2_ipc(Board *board_ipc)
   }
 }
 
-int board_completed(Board *board)
+void print_blue_board()
 {
-  if (board->blocked1 && board->blocked2)
+  cout << "*****************************" << endl;
+  for (int i = 0; i < HEIGHT; i++)
   {
-    board->return_condition = 1;
-    return 1;
+    for (int j = 0; j < WIDTH; j++)
+    {
+
+      if (blue_position.game_board[i][j] == 'b')
+      {
+        printf("\x1b[34m"
+               "* "
+               "\x1b[0m");
+      }
+      else
+      {
+        printf("x ");
+      }
+    }
+    cout << endl;
   }
-  else
+
+  cout << "*****************************" << endl;
+}
+
+void print_red_board()
+{
+  cout << "*****************************" << endl;
+  for (int i = 0; i < HEIGHT; i++)
   {
-    board->return_condition = 0;
-    return 0;
+    for (int j = 0; j < WIDTH; j++)
+    {
+
+      if (red_position.game_board[i][j] == 'r')
+      {
+        printf("\x1b[31m"
+               "* "
+               "\x1b[0m");
+      }
+      else
+      {
+        printf("x ");
+      }
+    }
+    cout << endl;
   }
+
+  cout << "*****************************" << endl;
 }

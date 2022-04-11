@@ -6,8 +6,7 @@
 #include <stack>
 #include <sys/ipc.h>
 #include <sys/shm.h>
-#include <semaphore.h>
-
+#include <sys/sem.h>
 
 using namespace std;
 #define UP 1
@@ -32,7 +31,6 @@ void print_blue_board();
 void print_red_board();
 void start_processes();
 
-
 class Player
 {
 public:
@@ -45,10 +43,12 @@ class Board
 {
 public:
     int red, blue;
+    int blocked1, blocked2;
+    int return_condition;
     char game_board[HEIGHT][WIDTH];
 };
 
-void play(pid_t, Board*);
+void play(int, Board *);
 Player player_1;
 Player player_2;
 
@@ -58,4 +58,3 @@ Board blue_position;
 Board red_position;
 
 pthread_mutex_t lock = PTHREAD_MUTEX_INITIALIZER;
-int signal_att = 0;
