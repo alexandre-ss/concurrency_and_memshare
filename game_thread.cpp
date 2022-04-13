@@ -1,4 +1,6 @@
 #include "game.hpp"
+
+void add_piece(string);
 struct timespec ts;
 int main()
 {
@@ -16,7 +18,7 @@ int main()
     while (!(player_1.blocked && player_2.blocked))
         ;
 
-    system("clear");
+    // system("clear");
 
     counter();
 
@@ -59,7 +61,8 @@ void setup_board()
 
     board.red = 0;
     board.blue = 0;
-
+    board.done = 1;
+    
     player_1.x = 0;
     player_1.y = WIDTH / 2;
     player_1.blocked = 0;
@@ -79,18 +82,13 @@ void *player_one_play(void *)
     ts.tv_nsec = (10 % 1000) * 1000000;
     while (!player_1.blocked)
     {
-        cout << "player 1 playing!\n";
+
         if (!is_blocked(player_1.x, player_1.y, 'r'))
         {
+            while (board.done != 1 && !player_2.blocked)
+                ;
             random_choice_p1();
-
-            pthread_mutex_lock(&lock);
-
-            if (board.game_board[player_1.x][player_1.y] == 'x')
-            {
-                add_piece_player_1();
-            }
-            pthread_mutex_unlock(&lock);
+            add_piece("p1");
         }
         else
         {
@@ -121,18 +119,13 @@ void *player_two_play(void *)
     ts.tv_nsec = (10 % 1000) * 1000000;
     while (!player_2.blocked)
     {
-        cout << "player 2 playing!\n";
+
         if (!is_blocked(player_2.x, player_2.y, 'b'))
         {
+            while (board.done != 2 && !player_1.blocked)
+                ;
             random_choice_p2();
-
-            pthread_mutex_lock(&lock);
-
-            if (board.game_board[player_2.x][player_2.y] == 'x')
-            {
-                add_piece_player_2();
-            }
-            pthread_mutex_unlock(&lock);
+            add_piece("p2");
         }
         else
         {
@@ -248,20 +241,37 @@ int is_blocked(int pos_x, int pos_y, char value)
     return 0;
 }
 
-void add_piece_player_1()
+void add_piece(string player)
 {
-    board.game_board[player_1.x][player_1.y] = 'r';
-    red_position.game_board[player_1.x][player_1.y] = 'r';
-    player_1.history_x.push(player_1.x);
-    player_1.history_y.push(player_1.y);
-}
-
-void add_piece_player_2()
-{
-    board.game_board[player_2.x][player_2.y] = 'b';
-    blue_position.game_board[player_2.x][player_2.y] = 'b';
-    player_2.history_x.push(player_2.x);
-    player_2.history_y.push(player_2.y);
+    if (player == "p1")
+    {
+        pthread_mutex_lock(&lock);
+        cout << "player 1 playing!\n";
+        if (board.game_board[player_1.x][player_1.y] == 'x')
+        {
+            board.game_board[player_1.x][player_1.y] = 'r';
+            red_position.game_board[player_1.x][player_1.y] = 'r';
+            player_1.history_x.push(player_1.x);
+            player_1.history_y.push(player_1.y);
+        }
+        board.done = 2;
+        pthread_mutex_unlock(&lock);
+    }
+    else if (player == "p2")
+    {
+        pthread_mutex_lock(&lock);
+        cout << "player 2 playing!\n";
+        if (board.game_board[player_2.x][player_2.y] == 'x')
+        {
+            board.game_board[player_2.x][player_2.y] = 'b';
+            blue_position.game_board[player_2.x][player_2.y] = 'b';
+            player_2.history_x.push(player_2.x);
+            player_2.history_y.push(player_2.y);
+        }
+        board.done = 1;
+        pthread_mutex_unlock(&lock);
+    }
+    //print_board();
 }
 
 void print_board()

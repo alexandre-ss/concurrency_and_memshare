@@ -43,9 +43,9 @@ int main()
     cout << "the winner is " << winner << "!" << endl;
     clock_t end = clock();
     cout << "execution time: " << (double)(end - begin) / CLOCKS_PER_SEC << endl;
+    sem_destroy(&smutex);
+    shmdt(board_aux);
   }
-  sem_destroy(&smutex);
-  shmdt(board_aux);
   return 0;
 }
 
@@ -73,7 +73,6 @@ void play(pid_t id, Board *board_game)
 {
   if (id > 0)
   {
-    cout << "player 1 playing!" << endl;
     if (!is_blocked_ipc(player_1.x, player_1.y, 'r', board_game))
     {
       random_choice_p1_ipc(board_game);
@@ -99,8 +98,6 @@ void play(pid_t id, Board *board_game)
   }
   else if (id == 0)
   {
-    cout << "player 2 playing!" << endl;
-
     if (!is_blocked_ipc(player_2.x, player_2.y, 'b', board_game))
     {
       random_choice_p2_ipc(board_game);
@@ -127,6 +124,7 @@ void play(pid_t id, Board *board_game)
 
   sem_wait(&smutex);
   add_piece(id, board_game);
+  //print_board_ipc(board_game);
   sem_post(&smutex);
 }
 
@@ -147,6 +145,8 @@ void setup_board_ipc(Board *board_ipc)
   board_ipc->blue = 0;
   board_ipc->blocked1 = 0;
   board_ipc->blocked2 = 0;
+  board_ipc->done = 1;
+
   player_1.x = 0;
   player_1.y = WIDTH / 2;
   player_1.blocked = 0;
@@ -253,9 +253,10 @@ int is_blocked_ipc(int pos_x, int pos_y, char value, Board *board_ipc)
 
 void add_piece(pid_t id, Board *board_ipc)
 {
-
   if (id > 0)
   {
+    while(board_ipc->done != 1 && !board_ipc->blocked2);
+    cout << "player 1 playing!" << endl;
     if (board_ipc->game_board[player_1.x][player_1.y] == 'x')
     {
       board_ipc->game_board[player_1.x][player_1.y] = 'r';
@@ -263,9 +264,12 @@ void add_piece(pid_t id, Board *board_ipc)
       player_1.history_x.push(player_1.x);
       player_1.history_y.push(player_1.y);
     }
+    board_ipc->done = 2;
   }
   else if (id == 0)
   {
+    while(board_ipc->done != 2 && !board_ipc->blocked1);
+    cout << "player 2 playing!" << endl;
     if (board_ipc->game_board[player_2.x][player_2.y] == 'x')
     {
       board_ipc->game_board[player_2.x][player_2.y] = 'b';
@@ -273,6 +277,7 @@ void add_piece(pid_t id, Board *board_ipc)
       player_2.history_x.push(player_2.x);
       player_2.history_y.push(player_2.y);
     }
+    board_ipc->done = 1;
   }
 }
 

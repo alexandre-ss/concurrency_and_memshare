@@ -44,6 +44,7 @@ class Board
 public:
     int red, blue;
     int blocked1, blocked2;
+    int done;
     int return_condition;
     char game_board[HEIGHT][WIDTH];
 };
